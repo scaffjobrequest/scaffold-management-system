@@ -175,16 +175,9 @@ async function loadPendingJobs() {
 
     allJobs = await response.json();
 
-    const tbody =
-      document.getElementById('jobTableBody');
-
-    tbody.innerHTML = '';
-
     // NO DATA
 
-    if(allJobs.length === 0) {
-
-      tbody.innerHTML = `
+    document.getElementById('jobTableBody').innerHTML = `
 
         <tr>
 
@@ -203,103 +196,9 @@ async function loadPendingJobs() {
 
     }
 
-    // LOOP JOBS
+   renderCurrentPage();
 
-    const start =
-  (currentPage - 1) * rowsPerPage;
-
-const end =
-  start + rowsPerPage;
-
-const pageJobs =
-  allJobs.slice(start, end);
-    
-tbody.innerHTML = '';
-pageJobs.forEach(job => {
-
-      const row = `
-
-        <tr>
-
-          <td class="border p-3 text-center">
-            ${job.jobId}
-          </td>
-
-          <td class="border p-3 text-left">
-            ${job.description}
-          </td>
-
-          <td class="border p-3 text-center">
-            ${job.area}
-          </td>
-          
-          <td class="border p-3 text-center">
-            ${job.workType}
-          </td>
-
-          <td class="border p-3 text-center">
-            ${job.quantity} m³
-          </td>
-
-          <td class="border p-3 text-center">
-            ${formatDate(job.dueDate)}
-          </td>
-
-          
-          <td class="border p-3 text-center whitespace-nowrap">
-  ${
-    job.images && job.images.length > 0
-
-    ?
-
-    `<button
-        onclick="showImages('${job.images}')"
-        class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs inline-block"
-      >
-        View
-      </button>`
-
-    :
-
-    '-'
-  }
-
-</td>
-
-          <td class="border p-3">
-
-            <div class="flex justify-center gap-2">
-
-              <!-- APPROVE -->
-
-              <button
-                onclick="approveJob('${job.jobId}')"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-              >
-                Approve
-              </button>
-
-              <!-- REJECT -->
-
-              <button
-                onclick="rejectJob('${job.jobId}')"
-                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
-              >
-                Reject
-              </button>
-
-            </div>
-
-          </td>
-
-        </tr>
-
-      `;
-
-      tbody.innerHTML += row;
-
-    });
-    updatePageInfo();
+return;
 
   } catch(error) {
 
@@ -432,14 +331,84 @@ document
 // INITIAL LOAD
 
 loadPendingJobs();
-function showImages(link) {
+  
+function showImages(images) {
 
-  if (!link || link === '-') {
+  if (!images || images.length === 0) {
 
-    alert('No Image');
+    alert("No Image");
     return;
 
   }
+
+  const popup = document.createElement("div");
+
+  popup.id = "imagePopup";
+
+  popup.className =
+    "fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50";
+
+  let html = "";
+
+  images.forEach(link => {
+
+    html += `
+
+      <div class="mb-6">
+
+        <img
+          src="${link}"
+          class="w-full max-h-[70vh] object-contain rounded-xl border"
+        />
+
+        <div class="mt-2">
+
+          <a
+            href="${link}"
+            target="_blank"
+            class="text-blue-600 underline break-all"
+          >
+            Open Full Image
+          </a>
+
+        </div>
+
+      </div>
+
+    `;
+
+  });
+
+  popup.innerHTML = `
+
+    <div class="bg-white rounded-2xl p-6 max-w-4xl w-full mx-4 relative overflow-auto max-h-[90vh]">
+
+      <div class="flex justify-between items-center mb-4">
+
+        <h2 class="text-3xl font-bold">
+
+          Job Images
+
+        </h2>
+
+        <button
+          onclick="closeImagePopup()"
+          class="bg-red-500 text-white px-5 py-2 rounded-lg"
+        >
+          Close
+        </button>
+
+      </div>
+
+      ${html}
+
+    </div>
+
+  `;
+
+  document.body.appendChild(popup);
+
+}
 
   const popup = document.createElement('div');
 
@@ -520,17 +489,116 @@ function updatePageInfo() {
   ).disabled = currentPage === totalPages;
 
 }
+function renderCurrentPage() {
 
+  const tbody =
+    document.getElementById('jobTableBody');
+
+  tbody.innerHTML = '';
+
+  const start =
+    (currentPage - 1) * rowsPerPage;
+
+  const end =
+    start + rowsPerPage;
+
+  const pageJobs =
+    allJobs.slice(start, end);
+  
+let html = '';
+  
+  pageJobs.forEach(job => {
+
+    const row = `
+
+      <tr>
+
+        <td class="border p-3 text-center">
+          ${job.jobId}
+        </td>
+
+        <td class="border p-3 text-left">
+          ${job.description}
+        </td>
+
+        <td class="border p-3 text-center">
+          ${job.area}
+        </td>
+
+        <td class="border p-3 text-center">
+          ${job.workType}
+        </td>
+
+        <td class="border p-3 text-center">
+          ${job.quantity} m³
+        </td>
+
+        <td class="border p-3 text-center">
+          ${formatDate(job.dueDate)}
+        </td>
+
+        <td class="border p-3 text-center whitespace-nowrap">
+
+          ${
+            job.images && job.images.length > 0
+            ?
+            `<button
+  onclick='showImages(${JSON.stringify(job.images || [])})'
+  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs inline-block"
+>
+  View
+</button>`
+            :
+            '-'
+          }
+
+        </td>
+
+        <td class="border p-3">
+
+          <div class="flex justify-center gap-2">
+
+            <button
+              onclick="approveJob('${job.jobId}')"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+            >
+              Approve
+            </button>
+
+            <button
+              onclick="rejectJob('${job.jobId}')"
+              class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg"
+            >
+              Reject
+            </button>
+
+          </div>
+
+        </td>
+
+      </tr>
+
+    `;
+
+    html += row;
+
+  });
+
+tbody.innerHTML = html;
+
+updatePageInfo();
+
+}
 function nextPage() {
 
   const totalPages =
     Math.ceil(allJobs.length / rowsPerPage);
 
-  if(currentPage < totalPages) {
+  if(currentPage < totalPages){
 
     currentPage++;
 
-    loadPendingJobs();
+    renderCurrentPage();
 
   }
 
@@ -538,11 +606,11 @@ function nextPage() {
 
 function prevPage() {
 
-  if(currentPage > 1) {
+  if(currentPage > 1){
 
     currentPage--;
 
-    loadPendingJobs();
+    renderCurrentPage();
 
   }
 
