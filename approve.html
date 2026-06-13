@@ -170,35 +170,13 @@ async function loadPendingJobs() {
   try {
 
     const response = await fetch(
-      `${API_URL}?action=getPendingJobs`
-    );
+     const response = await fetch(
+  `${API_URL}?action=getPendingJobs`
+);
 
-    allJobs = await response.json();
+allJobs = await response.json();
 
-    // NO DATA
-
-    document.getElementById('jobTableBody').innerHTML = `
-
-        <tr>
-
-          <td
-            colspan="6"
-            class="border p-6 text-center text-slate-400"
-          >
-            No Pending Requests
-          </td>
-
-        </tr>
-
-      `;
-
-      return;
-
-    }
-
-   renderCurrentPage();
-
-return;
+console.log(allJobs);
 
   } catch(error) {
 
@@ -403,60 +381,6 @@ function showImages(images) {
       ${html}
 
     </div>
-
-  `;
-
-  document.body.appendChild(popup);
-
-}
-
-  const popup = document.createElement('div');
-
-  popup.id = 'imagePopup';
-
-  popup.className =
-    'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50';
-
-  popup.innerHTML = `
-
-    <div class="bg-white rounded-2xl p-6 max-w-3xl w-full mx-4 relative">
-
-      <div class="flex justify-between items-center mb-4">
-
-        <h2 class="text-3xl font-bold">
-          Job Images
-        </h2>
-
-        <button
-          onclick="closeImagePopup()"
-          class="bg-red-500 text-white px-5 py-2 rounded-lg"
-        >
-          Close
-        </button>
-
-      </div>
-
-      <div class="border-t pt-4">
-
-  <img
-    src="${link}"
-    alt="Job Image"
-    class="w-full max-h-[70vh] object-contain rounded-xl border"
-  />
-
-  <div class="mt-4">
-
-    <a
-      href="${link}"
-      target="_blank"
-      class="text-blue-600 underline break-all"
-    >
-      Open Full Image
-    </a>
-
-  </div>
-
-</div>
 
   `;
 
